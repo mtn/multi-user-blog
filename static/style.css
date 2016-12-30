@@ -3,6 +3,26 @@ label {
   width: 285px;
   line-height: 1.7em;
 }
+header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+a {
+  text-decoration: none;
+  color:inherit;
+}
 .error {
-  color: red;
+  color:red;
+}
+.newpost-subtitle {
+  margin-top: 20px;
+}
+.inline-div {
+  display: inline-block;
+  width:49%;
+}
+.post-created {
+  color: grey;
 }

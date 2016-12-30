@@ -142,11 +142,50 @@ class Logout(Handler):
         self.logout()
         self.redirect('/signup')
 
-class Main(Handler):
-    def get(self):
-        self.response.write("/signup, /login, /logout")
 
-app = webapp2.WSGIApplication([('/', Main),
+class Posts(db.Model):
+    subject = db.StringProperty(required = True)
+    content = db.TextProperty(required = True)
+    created = db.DateProperty(auto_now_add = True)
+
+class NewPost(Handler):
+    def render_newpage(self, subject = "", post = "", error = ""):
+        self.render("new_post.html", subject=subject, post=post, error=error)
+
+    def get(self):
+        self.render_newpage()
+
+    def post(self):
+        subject = self.request.get('subject')
+        post = self.request.get('post')
+        error = ""
+
+        if subject and post:
+            a = Posts(subject=subject, content=post)
+            a.put()
+            self.redirect('/%s' % str(a.key().id()))
+        else:
+            error = "Please provide both a subject and a post!"
+            self.render_newpage(subject,post,error)
+
+class PostPage(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id))
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return
+        self.render("permalink.html", post=post)
+
+class MainPage(Handler):
+    def get(self):
+        posts = db.GqlQuery("select * from Posts order by created desc limit 10")
+        self.render("main.html", posts=posts)
+
+app = webapp2.WSGIApplication([('/', MainPage),
+                               ('/newpost', NewPost),
+                               ('/([0-9]+)', PostPage),
                                ('/signup', Signup),
                                ('/login', Login),
                                ('/logout', Logout)

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% for post in posts %}
+  <div class="inline-div">
+    <h2 style="margin-bottom:0"><a href={{post.key().id()}}>{{post.subject}}</a></h2>
+  </div>
+  <div style="text-align:right" class="inline-div">
+      <span class="post-created">{{post.created}}</span>
+  </div>
+  <hr>
+  <div class="post-content">
+    <p>{{post.content}}</p>
+  </div>
+{% endfor %}
+{% endblock %}
