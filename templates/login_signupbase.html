@@ -31,23 +31,39 @@
                 <div class="row control-group">
                     <div class="form-group col-xs-12 floating-label-form-group controls">
                         <label>Username</label>
-                        <input type="text" class="form-control" placeholder="Name" id="name">
+                        <input type="text" class="form-control" placeholder="Username" name="username" id="name" value={{username}}>
                         <p class="help-block text-danger"></p>
                     </div>
                 </div>
                 <div class="row control-group">
                     <div class="form-group col-xs-12 floating-label-form-group controls">
                         <label>Password</label>
-                        <input type="password" class="form-control" placeholder="Password" id="password">
+                        <input type="password" class="form-control" placeholder="Password" name="password" id="password">
                         <p class="help-block text-danger"></p>
                     </div>
                 </div>
+                {% block signup %}
+                {% endblock %}
                 <br>
-                <!-- <div "error">
-                </div> -->
+                {% if name_err or pass_err or match_err or email_err %}
+                  {% for i in [name_err,pass_err,match_err,email_err] %}
+                    {% if i %}
+                      <div class="login-signup-error">
+                        <span>{{i}}</span>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                <br>
+                {% endif %}
                 <div class="row">
                     <div class="form-group col-xs-12">
-                        <button type="submit" class="btn btn-default">Send</button>
+                        {% if login %}
+                          <button type="submit" class="btn btn-default">Login</button>
+                          <span>or <a class="decorated-link" href="/signup">signup</a></span>
+                        {% else %}
+                          <button type="submit" class="btn btn-default">Signup</button>
+                          <span>or <a class="decorated-link" href="/login">login</a></span>
+                        {% endif %}
                     </div>
                 </div>
             </form>

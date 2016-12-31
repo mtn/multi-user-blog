@@ -1,7 +1,22 @@
-{% extends "base.html" %}
+{% extends "login_signupbase.html" %}
 
-{% block content %}
-<h1>Signup</h1>
+{% block signup %}
+<div class="row control-group">
+    <div class="form-group col-xs-12 floating-label-form-group controls">
+        <label>Verify Password</label>
+        <input type="password" class="form-control" placeholder="Verify Password" name="verify" id="name">
+        <p class="help-block text-danger"></p>
+    </div>
+</div>
+<div class="row control-group">
+    <div class="form-group col-xs-12 floating-label-form-group controls">
+        <label>Email (Optional)</label>
+        <input type="text" class="form-control" placeholder="Email (Optional)" name="email" id="name" value={{email}}>
+        <p class="help-block text-danger"></p>
+    </div>
+</div>
+{% endblock %}
+<!-- <h1>Signup</h1>
 <form method="post">
   <label>
     Username
@@ -32,5 +47,4 @@
     {% endif %}
   </label>
   <button type="submit">Submit</button>
-</form>
-{% endblock %}
+</form> -->

@@ -1,28 +1,6 @@
-label {
-  display: block;
-  width: 285px;
-  line-height: 1.7em;
-}
-header {
-  text-align: center;
-  font-weight: bold;
-  font-size: 32px;
-  margin-bottom: 10px;
-}
-.undecorated-link {
-  text-decoration: none;
-  color:inherit;
-}
-.error {
+.login-signup-error{
   color:red;
 }
-.newpost-subtitle {
-  margin-top: 20px;
-}
-.inline-div {
-  display: inline-block;
-  width:49%;
-}
-.post-created {
-  color: grey;
+.decorated-link{
+  text-decoration: underline;
 }

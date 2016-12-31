@@ -14,8 +14,10 @@
                     {{post.content}}
                   </h3>
               </a>
-              <!-- TODO link to submitter profile -->
-              <p class="post-meta">Posted by <a href="#">{{post.submitter_id}}</a> on {{post.created}}</p>
+              <!-- TODO link to submitter profile and replace id with username-->
+              <p class="post-meta">
+                Posted by <a href="#">{{post.submitter_id}}</a> on {{post.created}}
+              </p>
           </div>
           <hr>
           {% endfor %}

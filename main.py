@@ -145,9 +145,10 @@ class Signup(Handler):
 
 class Login(Handler):
     def get(self):
+        LOGIN_FORM = True
         user = self.get_active_user()
         if not user:
-            self.render("login.html")
+            self.render("login_signupbase.html", login=LOGIN_FORM)
         else:
             self.render("base.html",
                         user=user,
@@ -165,9 +166,13 @@ class Login(Handler):
                 self.login(a)
                 self.redirect('/')
             else:
-                self.render("login.html", pass_err="Incorrect password")
+                self.render("login_signupbase.html",
+                             pass_err="Incorrect password",
+                             login=LOGIN_FORM)
         else:
-            self.render("login.html", name_err="Username didn't exist in database")
+            self.render("login_signupbase.html",
+                         name_err="Username didn't exist in database",
+                         login=LOGIN_FORM)
 
 class Logout(Handler):
     def get(self):
