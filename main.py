@@ -224,10 +224,8 @@ class NewPost(Handler):
 
         if subject and post_content:
             if post:
-                post.key.delete()
                 post.subject=subject
-                post.content=content
-                post.content.created_by=user.key().id()
+                post.content=post_content
                 post.put()
             else:
                 post = Posts(subject=subject, content=post_content, submitter_id=created_by)
@@ -248,6 +246,7 @@ class EditPost(Handler):
                 post_content=post_content,
                 error=error,
                 user=user,
+                post_id=post_id,
                 mod1="editing",
                 mod2="more",
                 main_heading=self.MAIN_HEADING)
