@@ -9,7 +9,7 @@ header {
   font-size: 32px;
   margin-bottom: 10px;
 }
-a {
+.undecorated-link {
   text-decoration: none;
   color:inherit;
 }

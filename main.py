@@ -63,15 +63,11 @@ class Handler(webapp2.RequestHandler):
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
-    def id_from_cookie(self):
-        return self.read_secure_cookie('user_id')
-
-    # def get_user(self):
-
-    # def initialize(self, *a, **kw):
-    #     webapp2.RequestHandler.initialize(self, *a, **kw)
-    #     uid = self.read_secure_cookie('user_id')
-    #     self.username = uid and User.get_by_id(int(uid))
+    def get_active_user(self):
+        user_id = self.read_secure_cookie('user_id')
+        if user_id:
+            user = Users.get_by_id(int(user_id))
+            return user
 
 class Users(db.Model):
     username = db.StringProperty(required = True)
@@ -102,7 +98,15 @@ class Signup(Handler):
     MAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
     def get(self):
-        self.render("signup.html")
+        user = self.get_active_user()
+        if user:
+            self.render("base.html",
+                        user=user,
+                        message="""You are already signed in!  <a href='/logout'>Log out<a>
+                                   before creating a new account or return to the
+                                   <a href='/'>front page</a>""")
+        else:
+            self.render("signup.html")
 
     def post(self):
         username = self.request.get('username')
@@ -137,13 +141,19 @@ class Signup(Handler):
                 b = Users.register(username, password, email)
                 b.put()
                 self.login(b)
+                self.redirect('/')
 
 class Login(Handler):
     def get(self):
-        if not self.id_from_cookie():
+        user = self.get_active_user()
+        if not user:
             self.render("login.html")
         else:
-            self.response.write("You're already logged in!")
+            self.render("base.html",
+                        user=user,
+                        message="""You are already signed in!  <a href='/logout'>Log out<a>
+                                   before signing in a new account or return to the
+                                   <a href='/'>front page</a>.""")
 
     def post(self):
         username = self.request.get('username')
@@ -153,6 +163,7 @@ class Login(Handler):
         if a:
             if valid_pw(password, a.passhash):
                 self.login(a)
+                self.redirect('/')
             else:
                 self.render("login.html", pass_err="Incorrect password")
         else:
@@ -164,16 +175,21 @@ class Logout(Handler):
         self.redirect('/signup')
 
 class Posts(db.Model):
-    subject = db.StringProperty(required = True)
-    content = db.TextProperty(required = True)
-    created = db.DateProperty(auto_now_add = True)
+    subject    = db.StringProperty(required = True)
+    content    = db.TextProperty(required = True)
+    # created_by = db.StringProperty(required = True)
+    created    = db.DateProperty(auto_now_add = True)
 
 class NewPost(Handler):
-    def render_newpage(self, subject = "", post = "", error = ""):
-        self.render("new_post.html", subject=subject, post=post, error=error)
+    def render_newpage(self, user, subject = "", post = "", error = ""):
+        self.render("new_post.html", subject=subject, post=post, error=error, user=user)
 
     def get(self):
-        self.render_newpage()
+        user = self.get_active_user()
+        if user:
+            self.render_newpage(user=user)
+        else:
+            self.redirect('/login')
 
     def post(self):
         subject = self.request.get('subject')
@@ -190,20 +206,19 @@ class PostPage(Handler):
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id))
         post = db.get(key)
+        user = self.get_active_user()
 
         if not post:
             self.error(404)
             return
-        self.render("permalink.html", post=post)
+        if not user:
+            self.redirect('/login')
+        self.render("permalink.html", post=post, user=user)
 
 class MainPage(Handler):
     def get(self):
         posts = db.GqlQuery("select * from Posts order by created desc limit 10")
-
-        user_id = self.id_from_cookie()
-        if user_id:
-            user = Users.get_by_id(int(user_id))
-
+        user = self.get_active_user()
         self.render("main.html", posts=posts, user=user)
 
 app = webapp2.WSGIApplication([('/', MainPage),

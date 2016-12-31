@@ -6,7 +6,7 @@
     <link rel="stylesheet" tyle="text/css" href="/static/style.css">
   </head>
   <body>
-      <header><a href="/">Basic Blog</a></header>
+      <header><a class="undecorated-link" href="/">Basic Blog</a></header>
       <div class="login-signup">
       {% if user %}
         {{ user.name }} (<a class="login-link" href="/logout">logout</a>)
@@ -19,5 +19,6 @@
       <hr>
       {% block content %}
       {% endblock %}
+      {{ message | safe }}
   </body>
 </html>
