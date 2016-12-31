@@ -1,22 +1,25 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="content" style="width:70%">
-  <h2>new post</h2>
-
-  <form method="post">
-    <label>
-      <div class="newpost-subtitle">subject</div>
-      <input type="text" name="subject" value={{subject}}>
-    </label>
-    <label>
-      <div class="newpost-subtitle">post</div>
-      <textarea name="post" rows="8" cols="80">{{post}}</textarea>
-    </label>
-    <input type="hidden" name="submitter" value="{{submitter}}">
-    <div class="error">{{error}}</div>
-    <input type="submit">
-  </form>
-  </div>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+          <form method="post">
+            <p>Hit submit when you're finished. You can always edit posts later.</p>
+            <label>
+              <p>Title</p>
+              <input type="text" name="subject" value={{subject}}>
+            </label>
+            <label>
+              <p>Post</p>
+              <textarea name="post" rows="8" cols="80">{{post}}</textarea>
+            </label>
+          <div class="error">
+            <p>{{error}}</p>
+          </div>
+            <button type="submit" name="button">Submit</button>
+          </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

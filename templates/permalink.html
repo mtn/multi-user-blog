@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Probably can abstract this format -->
-<div class="inline-div">
-  <h2 style="margin-bottom:0">{{post.subject}}</h2>
-</div>
-<div style="text-align:right" class="inline-div">
-    <span class="post-created">{{post.created}}</span>
-</div>
-<hr>
-<div class="post-content">
-  <p>{{post.content}}</p>
-</div>
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+              {{post.content}}
+            </div>
+        </div>
+    </div>
+</article>
 {% endblock %}

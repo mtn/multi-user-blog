@@ -47,17 +47,17 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="/">Home</a>
+                        <a href="/">home</a>
                     </li>
                     {% if user %}
                       <li>
                         <a href="/newpost">newpost</a>
                       </li>
                       <li>
-                        {{user.username}} (<a href="/logout">logout</a>)
+                          <a href="/profile">profile</a>
                       </li>
                       <li>
-                          <a href="/profile">Profile</a>
+                        <a href="/logout">logout</a>
                       </li>
                     {% else %}
                       <li>
@@ -97,12 +97,18 @@
     <hr>
 
     <!-- Footer -->
-    <!-- <footer>
+    <footer>
         <div class="container">
-            <div style="height:10px; visibility:hidden;" class="row">
+            <div class="row">
+              {% if user %}
+              Currently signed in as <a href="/profile">{{user.username}}</a>.
+              {% else %}
+              Currently signed out.
+              {% endif %}
             </div>
         </div>
-    </footer> -->
+    </footer>
+
 
     <!-- jQuery -->
     <script src="../static/vendor/jquery/jquery.min.js"></script>
@@ -112,7 +118,6 @@
 
     <!-- Contact Form JavaScript -->
     <script src="../static/js/jqBootstrapValidation.js"></script>
-    <script src="../static/js/contact_me.js"></script>
 
     <!-- Theme JavaScript -->
     <script src="../static/js/clean-blog.min.js"></script>

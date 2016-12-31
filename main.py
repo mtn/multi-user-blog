@@ -97,8 +97,11 @@ class Signup(Handler):
     PASS_RE = re.compile(r"^.{3,20}$")
     MAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
+    MAIN_HEADING = "Sign Up"
+
     def get(self):
         user = self.get_active_user()
+        # TODO handle this
         if user:
             self.render("base.html",
                         user=user,
@@ -106,7 +109,7 @@ class Signup(Handler):
                                    before creating a new account or return to the
                                    <a href='/'>front page</a>""")
         else:
-            self.render("signup.html")
+            self.render("signup.html", main_heading=self.MAIN_HEADING)
 
     def post(self):
         username = self.request.get('username')
@@ -136,7 +139,9 @@ class Signup(Handler):
         else:
             a = Users.get_user_by_name(username).get()
             if a:
-                self.render("signup.html", name_err = "That username already exists")
+                self.render("signup.html",
+                             name_err = "That username already exists",
+                             main_heading=self.MAIN_HEADING)
             else:
                 b = Users.register(username, password, email)
                 b.put()
@@ -144,12 +149,16 @@ class Signup(Handler):
                 self.redirect('/')
 
 class Login(Handler):
+    LOGIN_FORM = True
+    MAIN_HEADING = "Login"
     def get(self):
-        LOGIN_FORM = True
         user = self.get_active_user()
         if not user:
-            self.render("login_signupbase.html", login=LOGIN_FORM)
+            self.render("login_signupbase.html",
+                         login=self.LOGIN_FORM,
+                         main_heading=self.MAIN_HEADING)
         else:
+            # TODO handle this
             self.render("base.html",
                         user=user,
                         message="""You are already signed in!  <a href='/logout'>Log out<a>
@@ -168,16 +177,18 @@ class Login(Handler):
             else:
                 self.render("login_signupbase.html",
                              pass_err="Incorrect password",
-                             login=LOGIN_FORM)
+                             login=self.LOGIN_FORM,
+                             main_heading=self.MAIN_HEADING)
         else:
             self.render("login_signupbase.html",
                          name_err="Username didn't exist in database",
-                         login=LOGIN_FORM)
+                         login=self.LOGIN_FORM,
+                         main_heading=MAIN_HEADING)
 
 class Logout(Handler):
     def get(self):
         self.logout()
-        self.redirect('/signup')
+        self.redirect('/login')
 
 class Posts(db.Model):
     subject = db.StringProperty(required = True)
@@ -186,8 +197,15 @@ class Posts(db.Model):
     created = db.DateProperty(auto_now_add = True)
 
 class NewPost(Handler):
+    MAIN_HEADER="New Post"
+
     def render_newpage(self, user, subject = "", post = "", error = ""):
-        self.render("new_post.html", subject=subject, post=post, error=error, user=user)
+        self.render("new_post.html",
+                     subject=subject,
+                     post=post,
+                     error=error,
+                     user=user,
+                     main_header=self.MAIN_HEADER)
 
     def get(self):
         user = self.get_active_user()
@@ -206,7 +224,9 @@ class NewPost(Handler):
             a.put()
             self.redirect('/%s' % str(a.key().id()))
         else:
-            self.render_newpage(subject, post, error="Please provide both a subject and a post!")
+            self.render_newpage(subject,
+                                post,
+                                error="Please provide both a subject and a post!")
 
 class PostPage(Handler):
     def get(self, post_id):
@@ -219,7 +239,7 @@ class PostPage(Handler):
             return
         if not user:
             self.redirect('/login')
-        self.render("permalink.html", post=post, user=user)
+        self.render("permalink.html", main_heading=post.subject, main_desc="by: " + user.username, post=post)
 
 class MainPage(Handler):
     def get(self):
