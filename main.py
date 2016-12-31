@@ -78,8 +78,8 @@ class Users(db.Model):
     def register(cls, username, password, email=None):
         passhash = make_pw_hash(password)
         return Users(username=username,
-                     passhash=passhash,
-                     email = email)
+                passhash=passhash,
+                email = email)
 
     @classmethod
     def get_user_by_name(cls, username):
@@ -103,9 +103,8 @@ class Signup(Handler):
         user = self.get_active_user()
         # TODO handle this
         if user:
-            self.render("base.html",
-                        user=user,
-                        message="""You are already signed in!  <a href='/logout'>Log out<a>
+            self.render("redirect_in_8.html",
+                    message="""You are already signed in!  <a href='/logout'>Log out<a>
                                    before creating a new account or return to the
                                    <a href='/'>front page</a>""")
         else:
@@ -130,12 +129,12 @@ class Signup(Handler):
 
         if name_err or pass_err or match_err or email_err:
             self.render("signup.html",
-                         username  = username,
-                         email     = email,
-                         name_err  = name_err,
-                         pass_err  = pass_err,
-                         match_err = match_err,
-                         email_err = email_err)
+                    username  = username,
+                    email     = email,
+                    name_err  = name_err,
+                    pass_err  = pass_err,
+                    match_err = match_err,
+                    email_err = email_err)
         else:
             a = Users.get_user_by_name(username).get()
             if a:
@@ -155,15 +154,13 @@ class Login(Handler):
         user = self.get_active_user()
         if not user:
             self.render("login_signupbase.html",
-                         login=self.LOGIN_FORM,
-                         main_heading=self.MAIN_HEADING)
+                    login=self.LOGIN_FORM,
+                    main_heading=self.MAIN_HEADING)
         else:
-            # TODO handle this
-            self.render("base.html",
-                        user=user,
-                        message="""You are already signed in!  <a href='/logout'>Log out<a>
-                                   before signing in a new account or return to the
-                                   <a href='/'>front page</a>.""")
+            self.render("redirect_in_8.html",
+                    message="""You are already signed in!  <a href='/logout'>Log out<a>
+                               before signing in a new account or return to the
+                               <a href='/'>front page</a>.""")
 
     def post(self):
         username = self.request.get('username')
@@ -176,14 +173,14 @@ class Login(Handler):
                 self.redirect('/')
             else:
                 self.render("login_signupbase.html",
-                             pass_err="Incorrect password",
-                             login=self.LOGIN_FORM,
-                             main_heading=self.MAIN_HEADING)
+                        pass_err="Incorrect password",
+                        login=self.LOGIN_FORM,
+                        main_heading=self.MAIN_HEADING)
         else:
             self.render("login_signupbase.html",
-                         name_err="Username didn't exist in database",
-                         login=self.LOGIN_FORM,
-                         main_heading=MAIN_HEADING)
+                    name_err="Username didn't exist in database",
+                    login=self.LOGIN_FORM,
+                    main_heading=self.MAIN_HEADING)
 
 class Logout(Handler):
     def get(self):
@@ -197,15 +194,15 @@ class Posts(db.Model):
     created = db.DateProperty(auto_now_add = True)
 
 class NewPost(Handler):
-    MAIN_HEADER="New Post"
+    MAIN_HEADING="New Post"
 
     def render_newpage(self, user, subject = "", post = "", error = ""):
         self.render("new_post.html",
-                     subject=subject,
-                     post=post,
-                     error=error,
-                     user=user,
-                     main_header=self.MAIN_HEADER)
+                subject=subject,
+                post=post,
+                error=error,
+                user=user,
+                main_heading=self.MAIN_HEADING)
 
     def get(self):
         user = self.get_active_user()
@@ -217,16 +214,18 @@ class NewPost(Handler):
     def post(self):
         subject = self.request.get('subject')
         post = self.request.get('post')
-        created_by = int(self.get_active_user().key().id())
+        user = self.get_active_user()
+        created_by = int(user.key().id())
 
         if subject and post:
             a = Posts(subject=subject, content=post, submitter_id=created_by)
             a.put()
             self.redirect('/%s' % str(a.key().id()))
         else:
-            self.render_newpage(subject,
-                                post,
-                                error="Please provide both a subject and a post!")
+            self.render_newpage(user=user,
+                    subject=subject,
+                    post=post,
+                    error="Please provide both a subject and a post!")
 
 class PostPage(Handler):
     def get(self, post_id):
@@ -239,7 +238,11 @@ class PostPage(Handler):
             return
         if not user:
             self.redirect('/login')
-        self.render("permalink.html", main_heading=post.subject, main_desc="by: " + user.username, post=post)
+        self.render("permalink.html",
+                main_heading=post.subject,
+                main_desc="by: " + user.username,
+                post=post,
+                user=user)
 
 class MainPage(Handler):
     def get(self):
@@ -249,10 +252,10 @@ class MainPage(Handler):
         posts = db.GqlQuery("select * from Posts order by created desc limit 10")
         user = self.get_active_user()
         self.render("main.html",
-                     posts=posts,
-                     user=user,
-                     main_desc=main_desc,
-                     main_heading=main_heading)
+                posts=posts,
+                user=user,
+                main_desc=main_desc,
+                main_heading=main_heading)
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/newpost', NewPost),
