@@ -218,9 +218,16 @@ class PostPage(Handler):
 
 class MainPage(Handler):
     def get(self):
+        main_desc = """A multi-user blog built using jinja2, Google App Engine,
+                       and the Clean Blog Theme by Start Bootstrap"""
+        main_heading = "Blog"
         posts = db.GqlQuery("select * from Posts order by created desc limit 10")
         user = self.get_active_user()
-        self.render("main.html", posts=posts, user=user)
+        self.render("main.html",
+                     posts=posts,
+                     user=user,
+                     main_desc=main_desc,
+                     main_heading=main_heading)
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/newpost', NewPost),

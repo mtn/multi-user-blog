@@ -1,17 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% for post in posts %}
-  <div class="inline-div">
-    <h2 style="margin-bottom:0"><a href={{post.key().id()}}>{{post.subject}}</a></h2>
-    <span>by {{post.submitter_id}}</span>
-  </div>
-  <div style="text-align:right" class="inline-div">
-      <span class="post-created">{{post.created}}</span>
-  </div>
-  <hr>
-  <div class="post-content">
-    <p>{{post.content}}</p>
-  </div>
-{% endfor %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+          {% for post in posts %}
+          <div class="post-preview">
+              <a href={{post.key().id()}}>
+                  <h2 class="post-title">
+                    {{post.subject}}
+                  </h2>
+                  <h3 class="post-subtitle">
+                    {{post.content}}
+                  </h3>
+              </a>
+              <!-- TODO link to submitter profile -->
+              <p class="post-meta">Posted by <a href="#">{{post.submitter_id}}</a> on {{post.created}}</p>
+          </div>
+          <hr>
+          {% endfor %}
+            <!-- Pager -->
+            <!-- <ul class="pager">
+                <li class="next">
+                    <a href="#">Older Posts &rarr;</a>
+                </li>
+            </ul> -->
+        </div>
+    </div>
+</div>
 {% endblock %}
