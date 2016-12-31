@@ -9,7 +9,14 @@
       <header><a class="undecorated-link" href="/">Basic Blog</a></header>
       <div class="login-signup">
       {% if user %}
-        {{ user.name }} (<a class="login-link" href="/logout">logout</a>)
+        <div class="inline-div">
+          <div>
+            {{ user.name }} (<a class="login-link" href="/logout">logout</a>)
+          </div>
+          <div>
+            <a href="/newpost">newpost</a>
+          </div>
+        </div>
       {% else %}
         <a class="login-link" href="/login">login</a>
         |

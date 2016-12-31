@@ -4,6 +4,7 @@
 {% for post in posts %}
   <div class="inline-div">
     <h2 style="margin-bottom:0"><a href={{post.key().id()}}>{{post.subject}}</a></h2>
+    <span>by {{post.submitter_id}}</span>
   </div>
   <div style="text-align:right" class="inline-div">
       <span class="post-created">{{post.created}}</span>

@@ -10,15 +10,13 @@
       <input type="text" name="subject" value={{subject}}>
     </label>
     <label>
-      <div class="newpost-subtitle">blog</div>
+      <div class="newpost-subtitle">post</div>
       <textarea name="post" rows="8" cols="80">{{post}}</textarea>
     </label>
-    <div class="error">{{error}} </div>
+    <input type="hidden" name="submitter" value="{{submitter}}">
+    <div class="error">{{error}}</div>
     <input type="submit">
-
   </form>
-
-
   </div>
 </div>
 {% endblock %}

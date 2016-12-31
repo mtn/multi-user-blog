@@ -175,10 +175,10 @@ class Logout(Handler):
         self.redirect('/signup')
 
 class Posts(db.Model):
-    subject    = db.StringProperty(required = True)
-    content    = db.TextProperty(required = True)
-    # created_by = db.StringProperty(required = True)
-    created    = db.DateProperty(auto_now_add = True)
+    subject = db.StringProperty(required = True)
+    content = db.TextProperty(required = True)
+    submitter_id = db.IntegerProperty(required = True)
+    created = db.DateProperty(auto_now_add = True)
 
 class NewPost(Handler):
     def render_newpage(self, user, subject = "", post = "", error = ""):
@@ -194,9 +194,10 @@ class NewPost(Handler):
     def post(self):
         subject = self.request.get('subject')
         post = self.request.get('post')
+        created_by = int(self.get_active_user().key().id())
 
         if subject and post:
-            a = Posts(subject=subject, content=post)
+            a = Posts(subject=subject, content=post, submitter_id=created_by)
             a.put()
             self.redirect('/%s' % str(a.key().id()))
         else:
