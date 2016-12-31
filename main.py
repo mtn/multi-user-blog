@@ -159,7 +159,7 @@ class Login(Handler):
         else:
             self.render("redirect_in_8.html",
                     message="""You are already signed in!  <a href='/logout'>Log out<a>
-                               before signing in a new account or return to the
+                               before signing in with a new account or return to the
                                <a href='/'>front page</a>.""")
 
     def post(self):
@@ -196,10 +196,10 @@ class Posts(db.Model):
 class NewPost(Handler):
     MAIN_HEADING="New Post"
 
-    def render_newpage(self, user, subject = "", post = "", error = ""):
-        self.render("new_post.html",
+    def render_newpage(self, user, subject = "", post_content = "", error = ""):
+        self.render("post_base.html",
                 subject=subject,
-                post=post,
+                post_content=post_content,
                 error=error,
                 user=user,
                 main_heading=self.MAIN_HEADING)
@@ -212,20 +212,74 @@ class NewPost(Handler):
             self.redirect('/login')
 
     def post(self):
-        subject = self.request.get('subject')
-        post = self.request.get('post')
-        user = self.get_active_user()
-        created_by = int(user.key().id())
+        subject=self.request.get('subject')
+        post_content=self.request.get('post_content')
+        user=self.get_active_user()
+        created_by=int(user.key().id())
+        post_id=self.request.get('post_id')
+        if post_id:
+            post=Posts.get_by_id(int(post_id))
+        else:
+            post=None
 
-        if subject and post:
-            a = Posts(subject=subject, content=post, submitter_id=created_by)
-            a.put()
-            self.redirect('/%s' % str(a.key().id()))
+        if subject and post_content:
+            if post:
+                post.key.delete()
+                post.subject=subject
+                post.content=content
+                post.content.created_by=user.key().id()
+                post.put()
+            else:
+                post = Posts(subject=subject, content=post_content, submitter_id=created_by)
+                post.put()
+            self.redirect('/%s' % str(post.key().id()))
         else:
             self.render_newpage(user=user,
                     subject=subject,
-                    post=post,
+                    post_content=post_content,
                     error="Please provide both a subject and a post!")
+
+class EditPost(Handler):
+    MAIN_HEADING="Edit Post"
+
+    def render_editpage(self, user, post_id, subject, post_content, error = ""):
+        self.render("post_base.html",
+                subject=subject,
+                post_content=post_content,
+                error=error,
+                user=user,
+                mod1="editing",
+                mod2="more",
+                main_heading=self.MAIN_HEADING)
+
+    def render_improper_access(self):
+        self.render("redirect_in_8.html",
+                message="""It looks like you've accessed the edit post endpoint
+                           improperly; redirecting to the home page.
+                           <a href='/'>Click here</a> to go immediately.""")
+
+    def get(self):
+        self.render_improper_access()
+
+    def post(self):
+        subject=self.request.get('subject')
+        content=self.request.get('post_content')
+        post_id=self.request.get('post_id')
+        post=Posts.get_by_id(int(post_id))
+        user=self.get_active_user()
+        user_id=int(user.key().id())
+
+        if post and user and subject and content:
+            if post.submitter_id==user_id:
+                self.render_editpage(user,post_id,subject,content)
+                # post.subject=subject
+                # post.content=content
+                # post.put()
+                # self.redirect('/%s' % str(post.key().id()))
+            else:
+                self.render_improper_access()
+        else:
+            self.error(500)
 
 class PostPage(Handler):
     def get(self, post_id):
@@ -238,11 +292,14 @@ class PostPage(Handler):
             return
         if not user:
             self.redirect('/login')
+
+        by_user = int(user.key().id()) == post.submitter_id
         self.render("permalink.html",
                 main_heading=post.subject,
                 main_desc="by: " + user.username,
                 post=post,
-                user=user)
+                user=user,
+                owns=by_user)
 
 class MainPage(Handler):
     def get(self):
@@ -262,6 +319,8 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/([0-9]+)', PostPage),
                                ('/signup', Signup),
                                ('/login', Login),
-                               ('/logout', Logout)
+                               ('/logout', Logout),
+                               ('/editpost', EditPost),
+                               # ('/like', Like)
                               ],
                               debug = True)

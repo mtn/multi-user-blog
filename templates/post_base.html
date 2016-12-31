@@ -4,15 +4,15 @@
 <div class="container">
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-          <form method="post">
-            <p>Hit submit when you're finished. You can always edit posts later.</p>
+          <form method="post" action="/newpost">
+            <p>Hit submit when you're finished {{mod1}}. You can always edit posts {{mod2}} later.</p>
             <label>
               <p>Title</p>
               <input type="text" name="subject" value={{subject}}>
             </label>
             <label>
               <p>Post</p>
-              <textarea name="post" rows="8" cols="80">{{post}}</textarea>
+              <textarea name="post_content" rows="8" cols="80">{{post_content}}</textarea>
             </label>
           <div class="error">
             <p>{{error}}</p>
