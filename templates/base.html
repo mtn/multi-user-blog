@@ -7,6 +7,15 @@
   </head>
   <body>
       <header><a href="/">Basic Blog</a></header>
+      <div class="login-signup">
+      {% if user %}
+        {{ user.name }} (<a class="login-link" href="/logout">logout</a>)
+      {% else %}
+        <a class="login-link" href="/login">login</a>
+        |
+        <a class="login-link" href="/signup">signup</a>
+      {% endif %}
+      </div>
       <hr>
       {% block content %}
       {% endblock %}

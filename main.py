@@ -31,6 +31,11 @@ def valid_pw(password, h):
 def make_secure_val(val):
     return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
 
+def check_secure_val(secure_val):
+    val = secure_val.split('|')[0]
+    if secure_val == make_secure_val(val):
+        return val
+
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.write(*a, **kw)
@@ -48,11 +53,25 @@ class Handler(webapp2.RequestHandler):
             'Set-Cookie',
             '%s=%s; Path=/' % (name, cookie_val))
 
+    def read_secure_cookie(self, name):
+        val = self.request.cookies.get(name)
+        return val and check_secure_val(val)
+
     def login(self, user):
         self.set_secure_cookie('user_id', str(user.key().id()))
 
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+
+    def id_from_cookie(self):
+        return self.read_secure_cookie('user_id')
+
+    # def get_user(self):
+
+    # def initialize(self, *a, **kw):
+    #     webapp2.RequestHandler.initialize(self, *a, **kw)
+    #     uid = self.read_secure_cookie('user_id')
+    #     self.username = uid and User.get_by_id(int(uid))
 
 class Users(db.Model):
     username = db.StringProperty(required = True)
@@ -68,7 +87,6 @@ class Users(db.Model):
 
     @classmethod
     def get_user_by_name(cls, username):
-        # a = Users.all().filter('username=',username).get()
         a = db.GqlQuery("select * from Users where username=:1", username)
         return a
 
@@ -122,7 +140,10 @@ class Signup(Handler):
 
 class Login(Handler):
     def get(self):
-        self.render("login.html")
+        if not self.id_from_cookie():
+            self.render("login.html")
+        else:
+            self.response.write("You're already logged in!")
 
     def post(self):
         username = self.request.get('username')
@@ -142,7 +163,6 @@ class Logout(Handler):
         self.logout()
         self.redirect('/signup')
 
-
 class Posts(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
@@ -158,15 +178,13 @@ class NewPost(Handler):
     def post(self):
         subject = self.request.get('subject')
         post = self.request.get('post')
-        error = ""
 
         if subject and post:
             a = Posts(subject=subject, content=post)
             a.put()
             self.redirect('/%s' % str(a.key().id()))
         else:
-            error = "Please provide both a subject and a post!"
-            self.render_newpage(subject,post,error)
+            self.render_newpage(subject, post, error="Please provide both a subject and a post!")
 
 class PostPage(Handler):
     def get(self, post_id):
@@ -181,7 +199,12 @@ class PostPage(Handler):
 class MainPage(Handler):
     def get(self):
         posts = db.GqlQuery("select * from Posts order by created desc limit 10")
-        self.render("main.html", posts=posts)
+
+        user_id = self.id_from_cookie()
+        if user_id:
+            user = Users.get_by_id(int(user_id))
+
+        self.render("main.html", posts=posts, user=user)
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/newpost', NewPost),
@@ -189,6 +212,5 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/signup', Signup),
                                ('/login', Login),
                                ('/logout', Logout)
-                               # ('/welcome', Welcome)
                               ],
                               debug = True)
