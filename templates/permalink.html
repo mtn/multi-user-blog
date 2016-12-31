@@ -5,17 +5,29 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-              {{post.content}}
-              <br><br>
-              <!-- <form action="index.html" method="post">
-                <button type="submit" name="like">Like | {{post.likes}}</button>
-              </form> -->
               {% if owns %}
               <form action="/editpost" method="post">
                 <input type="hidden" name="subject" value={{post.subject}}>
                 <input type="hidden" name="post_content" value={{post.content}}>
                 <input type="hidden" name="post_id" value={{post.key().id()}}>
                 <button style="float:right" type="submit" name="button">edit</button>
+              </form>
+              <br><br>
+              {% endif %}
+              <div style="word-wrap:break-word">
+                {{post.content}}
+              </div>
+              <br><br>
+              {% if owns %}
+              <p>Likes: {{num_likes}}</p>
+              {% else %}
+              <form action="/like" method="post">
+                {% if likes %}
+                <button type="submit" name="unlike" value="pressed-unlike">Unlike | {{ num_likes}}</button>
+                {% else %}
+                <button type="submit" name="like" value="pressed-like">Like | {{ num_likes }}</button>
+                {% endif %}
+                <input type="hidden" name="post_id" value={{post.key().id()}}>
               </form>
               {% endif %}
             </div>

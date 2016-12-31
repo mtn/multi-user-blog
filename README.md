@@ -6,5 +6,7 @@ Project specifications from Udacity's [backend](https://www.udacity.com/course/i
 Features:
 * Sign-in (with profiles that display posts and comments, total likes on comments and posts)
 * Comment on posts (todo)
-* Like posts/comments (todo)
-* Edit own posts (todo)
+* Like posts/comments (but not your own)
+* Edit your own posts
+
+I know some things are done in silly ways (ex. rerendering page on like/unlike) but I'm making it up as I go :wink:. Google App Engine datastore probably isn't the best choice for this either.

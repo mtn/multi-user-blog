@@ -69,6 +69,12 @@ class Handler(webapp2.RequestHandler):
             user = Users.get_by_id(int(user_id))
             return user
 
+    def render_improper_endpoint_access(self, endpoint):
+        self.render("redirect_in_8.html",
+                message="""It looks like you've accessed the %s post endpoint
+                           improperly; redirecting to the home page.
+                           <a href='/'>Click here</a> to go immediately.""" % endpoint)
+
 class Users(db.Model):
     username = db.StringProperty(required = True)
     passhash = db.StringProperty(required = True)
@@ -192,12 +198,13 @@ class Posts(db.Model):
     content = db.TextProperty(required = True)
     submitter_id = db.IntegerProperty(required = True)
     created = db.DateProperty(auto_now_add = True)
+    liked_by = db.ListProperty(int, indexed=False, default=[], required=True)
 
 class NewPost(Handler):
     MAIN_HEADING="New Post"
 
     def render_newpage(self, user, subject = "", post_content = "", error = ""):
-        self.render("post_base.html",
+        self.render("mod_post_base.html",
                 subject=subject,
                 post_content=post_content,
                 error=error,
@@ -228,7 +235,9 @@ class NewPost(Handler):
                 post.content=post_content
                 post.put()
             else:
-                post = Posts(subject=subject, content=post_content, submitter_id=created_by)
+                post = Posts(subject=subject,
+                        content=post_content,
+                        submitter_id=created_by)
                 post.put()
             self.redirect('/%s' % str(post.key().id()))
         else:
@@ -241,7 +250,7 @@ class EditPost(Handler):
     MAIN_HEADING="Edit Post"
 
     def render_editpage(self, user, post_id, subject, post_content, error = ""):
-        self.render("post_base.html",
+        self.render("mod_post_base.html",
                 subject=subject,
                 post_content=post_content,
                 error=error,
@@ -252,10 +261,7 @@ class EditPost(Handler):
                 main_heading=self.MAIN_HEADING)
 
     def render_improper_access(self):
-        self.render("redirect_in_8.html",
-                message="""It looks like you've accessed the edit post endpoint
-                           improperly; redirecting to the home page.
-                           <a href='/'>Click here</a> to go immediately.""")
+        self.render_improper_endpoint_access("edit")
 
     def get(self):
         self.render_improper_access()
@@ -271,16 +277,12 @@ class EditPost(Handler):
         if post and user and subject and content:
             if post.submitter_id==user_id:
                 self.render_editpage(user,post_id,subject,content)
-                # post.subject=subject
-                # post.content=content
-                # post.put()
-                # self.redirect('/%s' % str(post.key().id()))
             else:
                 self.render_improper_access()
         else:
             self.error(500)
 
-class PostPage(Handler):
+class RenderPost(Handler):
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id))
         post = db.get(key)
@@ -293,12 +295,40 @@ class PostPage(Handler):
             self.redirect('/login')
 
         by_user = int(user.key().id()) == post.submitter_id
+        likes = int(user.key().id()) in post.liked_by
         self.render("permalink.html",
                 main_heading=post.subject,
                 main_desc="by: " + user.username,
                 post=post,
                 user=user,
+                likes=likes,
+                num_likes=len(post.liked_by),
                 owns=by_user)
+
+class LikeHandler(Handler):
+    def post(self):
+        liked=self.request.get('like')
+        unliked=self.request.get('unlike')
+        post_id=self.request.get('post_id')
+        post=Posts.get_by_id(int(post_id))
+        user=self.get_active_user()
+        user_id=int(user.key().id())
+
+        if liked:
+            if user_id in post.liked_by:
+                self.render_improper_endpoint_access("like")
+            else:
+                post.liked_by.append(user.key().id())
+                post.put()
+                self.redirect('/%s' % str(post.key().id()))
+        elif unliked:
+            if user_id in post.liked_by:
+                index=post.liked_by.index(user_id)
+                del post.liked_by[index]
+                post.put()
+                self.redirect('/%s' % str(post.key().id()))
+            else:
+                self.error(500)
 
 class MainPage(Handler):
     def get(self):
@@ -315,11 +345,11 @@ class MainPage(Handler):
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/newpost', NewPost),
-                               ('/([0-9]+)', PostPage),
+                               ('/([0-9]+)', RenderPost),
                                ('/signup', Signup),
                                ('/login', Login),
                                ('/logout', Logout),
                                ('/editpost', EditPost),
-                               # ('/like', Like)
+                               ('/like', LikeHandler)
                               ],
                               debug = True)
