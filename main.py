@@ -194,11 +194,11 @@ class Logout(Handler):
         self.redirect('/login')
 
 class Posts(db.Model):
-    subject = db.StringProperty(required = True)
-    content = db.TextProperty(required = True)
-    submitter_id = db.IntegerProperty(required = True)
-    created = db.DateProperty(auto_now_add = True)
-    liked_by = db.ListProperty(int, indexed=False, default=[], required=True)
+    subject=db.StringProperty(required=True)
+    content=db.TextProperty(required=True)
+    submitter_id=db.IntegerProperty(required=True)
+    created=db.DateProperty(auto_now_add=True)
+    liked_by=db.ListProperty(int, indexed=False, default=[], required=True)
 
 class NewPost(Handler):
     MAIN_HEADING="New Post"
@@ -294,6 +294,8 @@ class RenderPost(Handler):
         if not user:
             self.redirect('/login')
 
+        comments = db.GqlQuery("select * from Comments where submitter_id = %s" % user.key().id())
+
         by_user = int(user.key().id()) == post.submitter_id
         likes = int(user.key().id()) in post.liked_by
         self.render("permalink.html",
@@ -302,6 +304,7 @@ class RenderPost(Handler):
                 post=post,
                 user=user,
                 likes=likes,
+                comments=comments,
                 num_likes=len(post.liked_by),
                 owns=by_user)
 
@@ -330,17 +333,38 @@ class LikeHandler(Handler):
             else:
                 self.error(500)
 
+class Comments(db.Model):
+    submitter_id = db.IntegerProperty(required=True)
+    content = db.TextProperty(required = True)
+
+class NewCommentHandler(Handler):
+    def post(self):
+        comment=self.request.get('comment')
+        submitter_id=self.get_active_user().key().id()
+
+        comment = Comments(content=comment,submitter_id=submitter_id)
+        comment.put()
+
 class MainPage(Handler):
     def get(self):
-        main_desc = """A multi-user blog built using jinja2, Google App Engine,
-                       and the Clean Blog Theme by Start Bootstrap"""
+        main_desc="""A multi-user blog built using jinja2, Google App Engine,
+                     and the Clean Blog Theme by Start Bootstrap"""
         main_heading = "Blog"
-        posts = db.GqlQuery("select * from Posts order by created desc limit 10")
-        user = self.get_active_user()
+        user=self.get_active_user()
+        show_more=self.request.get('show_more')
+
+        to_show=self.request.get('to_show')
+        if not to_show:
+            to_show="10"
+        if show_more=="True":
+            to_show=str(int(to_show)+10)
+        posts = db.GqlQuery("select * from Posts order by created desc limit %s" % to_show)
+
         self.render("main.html",
                 posts=posts,
                 user=user,
                 main_desc=main_desc,
+                to_show=to_show,
                 main_heading=main_heading)
 
 app = webapp2.WSGIApplication([('/', MainPage),
@@ -350,6 +374,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/login', Login),
                                ('/logout', Logout),
                                ('/editpost', EditPost),
-                               ('/like', LikeHandler)
+                               ('/like', LikeHandler),
+                               ('/comment', NewCommentHandler)
                               ],
                               debug = True)

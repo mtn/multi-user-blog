@@ -11,7 +11,11 @@
                     {{post.subject}}
                   </h2>
                   <h3 class="post-subtitle">
-                    {{post.content}}
+                    {% if post.content|length > 300 %}
+                    {{ post.content[0:300] }}...
+                    {% else %}
+                    {{post.subject}}
+                    {% endif %}
                   </h3>
               </a>
               <!-- TODO link to submitter profile and replace id with username-->
@@ -22,11 +26,11 @@
           <hr>
           {% endfor %}
             <!-- Pager -->
-            <!-- <ul class="pager">
+            <ul class="pager">
                 <li class="next">
-                    <a href="#">Older Posts &rarr;</a>
+                    <a href="/?show_more=True">Load Older Posts &darr;</a>
                 </li>
-            </ul> -->
+            </ul>
         </div>
     </div>
 </div>

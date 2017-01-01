@@ -4,3 +4,6 @@
 .decorated-link{
   text-decoration: underline;
 }
+.post-subtitle{
+  word-break: break-all;
+}
