@@ -339,11 +339,14 @@ class Comments(db.Model):
 
 class NewCommentHandler(Handler):
     def post(self):
+        post_id=int(self.request.get('post_id'))
+        post=Posts.get_by_id(post_id)
         comment=self.request.get('comment')
         submitter_id=self.get_active_user().key().id()
 
         comment = Comments(content=comment,submitter_id=submitter_id)
         comment.put()
+        self.redirect('/%s' % str(post.key().id()))
 
 class MainPage(Handler):
     def get(self):

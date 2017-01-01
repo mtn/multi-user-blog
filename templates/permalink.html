@@ -35,6 +35,7 @@
                 <br><br>
                 <p>Leave a Comment</p>
                 <form action="/comment" method="post">
+                  <input type="hidden" name="post_id" value={{post.key().id()}}>
                   <textarea name="comment" rows="4" cols="60">{{comment}}</textarea>
                   <button type="submit" name="button">Submit</button>
                 </form>
