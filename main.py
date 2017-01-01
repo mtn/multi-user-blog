@@ -288,6 +288,17 @@ class EditPost(Handler):
             self.error(500)
 
 class RenderPost(Handler):
+    def render_permalink(self,post,comments,user=None,owns=False):
+        self.render("permalink.html",
+                main_heading=post.subject,
+                main_desc="by: " + (Users.get_by_id(post.submitter_id)).username,
+                post=post,
+                user=user,
+                comments=comments,
+                num_comments=len([comment for comment in comments]),
+                num_likes=len(post.liked_by),
+                owns=owns)
+
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id))
         post = db.get(key)
@@ -296,24 +307,19 @@ class RenderPost(Handler):
         if not post:
             self.error(404)
             return
-        if not user:
-            # TODO handle this
-            # self.render("permalink.html",
-            return
 
         comments = db.GqlQuery("select * from Comments where post_id = %s" % str(post.key().id()))
+        if not user:
+            self.render_permalink(post=post,comments=comments)
+            return
 
-        by_user = int(user.key().id()) == post.submitter_id
+
+        owned_by_user = int(user.key().id()) == post.submitter_id
         likes = int(user.key().id()) in post.liked_by
-        self.render("permalink.html",
-                main_heading=post.subject,
-                main_desc="by: " + user.username,
+        self.render_permalink(user=user,
                 post=post,
-                user=user,
-                likes=likes,
                 comments=comments,
-                num_likes=len(post.liked_by),
-                owns=by_user)
+                owns=owned_by_user)
 
 class LikeHandler(Handler):
     def post(self):

@@ -18,11 +18,11 @@
                 {{post.content}}
               </div>
               <br><br>
-              {% if owns %}
+              {% if owns or not user %}
               <p>Likes: {{num_likes}}</p>
               {% else %}
               <form action="/like" method="post">
-                {% if likes %}
+                {% if user and user.key().id() in post.liked_by %}
                 <button type="submit" name="unlike" value="pressed-unlike">Unlike | {{ num_likes}}</button>
                 {% else %}
                 <button type="submit" name="like" value="pressed-like">Like | {{ num_likes }}</button>
@@ -31,6 +31,7 @@
               </form>
               {% endif %}
 
+              {% if user %}
               <div class="new-comment">
                 <br><br>
                 <p>Leave a Comment</p>
@@ -40,9 +41,13 @@
                   <button type="submit" name="submit">Submit</button>
                 </form>
               </div>
+              {% endif %}
               <div class="comments">
                 <br>
-                <p>Comments</p>
+                <p><u>Comments</u></p>
+                {% if num_comments == 0 %}
+                <p>No comments yet.</p>
+                {% endif %}
                 {% for comment in comments %}
                 <div style="background-color:#f5f5f0; padding:1px">
                   <p style="margin-left:10px">{{comment.content}}</p>
