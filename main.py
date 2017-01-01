@@ -221,6 +221,8 @@ class NewPost(Handler):
     def post(self):
         subject=self.request.get('subject')
         post_content=self.request.get('post_content')
+        submit=self.request.get('submit')
+        cancel=self.request.get('cancel')
         user=self.get_active_user()
         created_by=int(user.key().id())
         post_id=self.request.get('post_id')
@@ -229,7 +231,10 @@ class NewPost(Handler):
         else:
             post=None
 
-        if subject and post_content:
+        if cancel=="cancel":
+            self.redirect('/%s' % str(post.key().id()))
+            return
+        if submit=="submit" and subject and post_content:
             if post:
                 post.subject=subject
                 post.content=post_content
@@ -292,9 +297,11 @@ class RenderPost(Handler):
             self.error(404)
             return
         if not user:
-            self.redirect('/login')
+            # TODO handle this
+            # self.render("permalink.html",
+            return
 
-        comments = db.GqlQuery("select * from Comments where submitter_id = %s" % user.key().id())
+        comments = db.GqlQuery("select * from Comments where post_id = %s" % str(post.key().id()))
 
         by_user = int(user.key().id()) == post.submitter_id
         likes = int(user.key().id()) in post.liked_by
@@ -335,16 +342,19 @@ class LikeHandler(Handler):
 
 class Comments(db.Model):
     submitter_id = db.IntegerProperty(required=True)
+    post_id = db.IntegerProperty(required=True)
     content = db.TextProperty(required = True)
 
 class NewCommentHandler(Handler):
+
+    #TODO handle deletion and edits
     def post(self):
         post_id=int(self.request.get('post_id'))
         post=Posts.get_by_id(post_id)
         comment=self.request.get('comment')
         submitter_id=self.get_active_user().key().id()
 
-        comment = Comments(content=comment,submitter_id=submitter_id)
+        comment = Comments(post_id=post_id,content=comment,submitter_id=submitter_id)
         comment.put()
         self.redirect('/%s' % str(post.key().id()))
 
