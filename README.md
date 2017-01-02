@@ -9,4 +9,7 @@ Features:
 * Like posts/comments (but not your own)
 * Edit your own posts
 
-I know some things are done in silly ways (ex. rerendering page on like/unlike) but I'm making it up as I go :wink:. Google App Engine datastore probably isn't the best choice for this either.
+I know some things are done in silly ways (ex. rerendering page on like/unlike) but I'm making it up as I go :wink:. Google App Engine datastore probably isn't the best choice for this either (no joins -> this would have performance issues at scale).
+
+To run locally:
+After [setting up the app engine](https://cloud.google.com/appengine/downloads), clone the repository and run `dev_appserver.py .` at the root of the directory.

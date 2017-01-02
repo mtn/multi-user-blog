@@ -10,6 +10,7 @@
                 <input type="hidden" name="subject" value={{post.subject}}>
                 <input type="hidden" name="post_content" value={{post.content}}>
                 <input type="hidden" name="post_id" value={{post.key().id()}}>
+                <button style="float:right" type="submit" name="delete" formaction="/delete_post">delete</button>
                 <button style="float:right" type="submit" name="button">edit</button>
               </form>
               <br><br>
@@ -61,7 +62,7 @@
                   </form>
                   {% endif %}
                   <p style="margin-left:20px">left by user: {{comment.submitter_id}}</p>
-                  {% if comment.submitter_id == user.key().id() %}
+                  {% if user and comment.submitter_id == user.key().id() %}
                   <form action={{post.key().id()}} method="get">
                     <button type="submit" name="edit" value={{comment.key().id()}}>edit</button>
                     <input type="hidden" name="post_id" value={{post.key().id()}}>
