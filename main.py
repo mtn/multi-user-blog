@@ -454,9 +454,12 @@ class LikeHandler(Handler):
             if user_id in post.liked_by:
                 self.render_improper_endpoint_access("like")
             else:
-                post.liked_by.append(user.key().id())
-                post.put()
-                self.redirect('/%s' % str(post.key().id()))
+                if post.submitter_id != user_id
+                    post.liked_by.append(user.key().id())
+                    post.put()
+                    self.redirect('/%s' % str(post.key().id()))
+                else:
+                    self.error(403)
         elif unliked:
             if user_id in post.liked_by:
                 index = post.liked_by.index(user_id)
