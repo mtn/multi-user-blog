@@ -30,11 +30,12 @@
                 <input type="hidden" name="post_id" value={{post.key().id()}}>
               </form>
               {% endif %}
-
+              <br>
+              <hr>
               {% if user %}
               <div class="new-comment">
-                <br><br>
-                <p>Leave a Comment</p>
+                <br>
+                <p>Leave a comment:</p>
                 <form action="/comment" method="post">
                   <input type="hidden" name="post_id" value={{post.key().id()}}>
                   <textarea name="comment" rows="4" cols="60">{{comment}}</textarea>
@@ -50,11 +51,21 @@
                 {% endif %}
                 {% for comment in comments %}
                 <div style="background-color:#f5f5f0; padding:1px">
+                  {% if (not edit_id) or (comment.key().id() != (edit_id|int)) %}
                   <p style="margin-left:10px">{{comment.content}}</p>
+                  {% else %}
+                  <form action="/modcomment" method="post">
+                    <textarea name="comment_edit" rows="4" cols="60">{{comment.content}}</textarea>
+                    <input type="hidden" name="comment_id" value={{comment.key().id()}}>
+                    <button type="submit" name="updated">Submit</button>
+                  </form>
+                  {% endif %}
                   <p style="margin-left:20px">left by user: {{comment.submitter_id}}</p>
                   {% if comment.submitter_id == user.key().id() %}
-                  <button type="submit" name="edit">edit</button>
-                  <button type="submit" name="delete">delete</button>
+                  <form action={{post.key().id()}} method="get">
+                    <button type="submit" name="edit" value={{comment.key().id()}}>edit</button>
+                    <button type="submit" name="delete" value={{comment.key().id()}}>delete</button>
+                  </form>
                   {% endif %}
                 </div>
                 {% endfor %}

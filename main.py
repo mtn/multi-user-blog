@@ -107,7 +107,6 @@ class Signup(Handler):
 
     def get(self):
         user = self.get_active_user()
-        # TODO handle this
         if user:
             self.render("redirect_in_8.html",
                     message="""You are already signed in!  <a href='/logout'>Log out<a>
@@ -191,7 +190,7 @@ class Login(Handler):
 class Logout(Handler):
     def get(self):
         self.logout()
-        self.redirect('/login')
+        self.redirect('/')
 
 class Posts(db.Model):
     subject=db.StringProperty(required=True)
@@ -288,7 +287,7 @@ class EditPost(Handler):
             self.error(500)
 
 class RenderPost(Handler):
-    def render_permalink(self,post,comments,user=None,owns=False):
+    def render_permalink(self,post,comments,edit_id=None,user=None,owns=False):
         self.render("permalink.html",
                 main_heading=post.subject,
                 main_desc="by: " + (Users.get_by_id(post.submitter_id)).username,
@@ -297,12 +296,15 @@ class RenderPost(Handler):
                 comments=comments,
                 num_comments=len([comment for comment in comments]),
                 num_likes=len(post.liked_by),
+                edit_id=edit_id,
                 owns=owns)
 
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id))
         post = db.get(key)
         user = self.get_active_user()
+        edit_id=self.request.get('edit')
+        delete_id=self.request.get('delete')
 
         if not post:
             self.error(404)
@@ -312,13 +314,16 @@ class RenderPost(Handler):
         if not user:
             self.render_permalink(post=post,comments=comments)
             return
-
+        if delete_id:
+            comment=Comments.get_by_id(int(delete_id))
+            comment.delete()
 
         owned_by_user = int(user.key().id()) == post.submitter_id
         likes = int(user.key().id()) in post.liked_by
         self.render_permalink(user=user,
                 post=post,
                 comments=comments,
+                edit_id=edit_id,
                 owns=owned_by_user)
 
 class LikeHandler(Handler):
@@ -351,9 +356,7 @@ class Comments(db.Model):
     post_id = db.IntegerProperty(required=True)
     content = db.TextProperty(required = True)
 
-class NewCommentHandler(Handler):
-
-    #TODO handle deletion and edits
+class NewComment(Handler):
     def post(self):
         post_id=int(self.request.get('post_id'))
         post=Posts.get_by_id(post_id)
@@ -363,6 +366,20 @@ class NewCommentHandler(Handler):
         comment = Comments(post_id=post_id,content=comment,submitter_id=submitter_id)
         comment.put()
         self.redirect('/%s' % str(post.key().id()))
+
+class ModComment(Handler):
+    def post(self):
+        modified_content=self.request.get('comment_edit')
+        comment_id=self.request.get('comment_id')
+        comment=Comments.get_by_id(int(comment_id))
+        user=self.get_active_user()
+
+        if user.key().id()==comment.submitter_id:
+            comment.content=modified_content
+            comment.put()
+            self.redirect('/%s' % str(comment.post_id))
+        else:
+            self.error(403)
 
 class MainPage(Handler):
     def get(self):
@@ -394,6 +411,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/logout', Logout),
                                ('/editpost', EditPost),
                                ('/like', LikeHandler),
-                               ('/comment', NewCommentHandler)
+                               ('/comment', NewComment),
+                               ('/modcomment', ModComment)
                               ],
                               debug = True)
