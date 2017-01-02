@@ -381,6 +381,15 @@ class ModComment(Handler):
         else:
             self.error(403)
 
+class DelComment(Handler):
+    def post(self):
+        comment_id=int(self.request.get('comment_id'))
+        post_id=self.request.get('post_id')
+        comment=Comments.get_by_id(comment_id)
+        comment.delete()
+
+        self.redirect('/%s' % post_id)
+
 class MainPage(Handler):
     def get(self):
         main_desc="""A multi-user blog built using jinja2, Google App Engine,
@@ -412,6 +421,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/editpost', EditPost),
                                ('/like', LikeHandler),
                                ('/comment', NewComment),
-                               ('/modcomment', ModComment)
+                               ('/modcomment', ModComment),
+                               ('/delete_comment', DelComment)
                               ],
                               debug = True)

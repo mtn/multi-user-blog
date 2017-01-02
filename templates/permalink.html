@@ -64,7 +64,8 @@
                   {% if comment.submitter_id == user.key().id() %}
                   <form action={{post.key().id()}} method="get">
                     <button type="submit" name="edit" value={{comment.key().id()}}>edit</button>
-                    <button type="submit" name="delete" value={{comment.key().id()}}>delete</button>
+                    <input type="hidden" name="post_id" value={{post.key().id()}}>
+                    <button formaction="/delete_comment" formmethod="post" type="submit" name="comment_id" value={{comment.key().id()}}>delete</button>
                   </form>
                   {% endif %}
                 </div>
