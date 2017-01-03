@@ -310,7 +310,7 @@ class NewPost(Handler):
         if cancel == "cancel":
             self.redirect('/%s' % str(post.key().id()))
             return
-        if post_id.submitter_id == user.key().id():
+        if (post and post.submitter_id == user.key().id()) or not post:
             if submit == "submit" and subject and post_content:
                 if post:
                     post.subject = subject
@@ -532,23 +532,25 @@ class DeleteComment(Handler):
 class Profile(Handler):
     """Profile rendering"""
     def get(self):
-        user=self.get_active_user()
-        if user:
-            user_id = user.key().id()
-            posts = db.GqlQuery("select * from Posts where submitter_id=:1"
-                                ,user_id)
-            comments = db.GqlQuery("select * from Comments where"
-                                   " submitter_id=:1",user_id)
-            self.render("profile.html",
-                        main_heading="User: " + user.username,
-                        main_desc="Your posts and comments",
-                        user=user,
-                        num_comments=len([comment for comment in comments]),
-                        num_posts=len([post for post in posts]),
-                        posts=posts,
-                        comments=comments)
-        else:
+        user_id = self.request.get('user_id')
+        if not user_id:
+            user_id = str(self.get_active_user().key().id())
+        if not user_id:
             self.redirect('/login')
+        user_id = int(user_id)
+        user = Users.get_by_id(user_id)
+        posts = db.GqlQuery("select * from Posts where submitter_id=:1"
+                            ,user_id)
+        comments = db.GqlQuery("select * from Comments where"
+                               " submitter_id=:1",user_id)
+        self.render("profile.html",
+                    main_heading="User: " + user.username,
+                    main_desc="Your posts and comments",
+                    user=user,
+                    # num_comments=len([comment for comment in comments]),
+                    # num_posts=len([post for post in posts]),
+                    posts=posts,
+                    comments=comments)
 
 
 class MainPage(Handler):
