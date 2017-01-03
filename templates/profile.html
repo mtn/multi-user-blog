@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      {% if num_posts == 0 %}
+      <p>No posts yet</p>
+      {% else %}
+      {% for post in posts %}
+      <div class="post-preview">
+          <a href={{post.key().id()}}>
+              <h2 class="post-title">
+                {{post.subject}}
+              </h2>
+              <h3 class="post-subtitle">
+                {% if post.content|length > 300 %}
+                {{ post.content[0:300] }}...
+                {% else %}
+                {{post.subject}}
+                {% endif %}
+              </h3>
+          </a>
+      </div>
+      <hr>
+      {% endfor %}
+      {% endif %}
+      <hr>
+      {% if num_comments == 0 %}
+      <p>No comments yet</p>
+      {% else %}
+      {% for comment in comments %}
+      <div class="post-preview">
+          <a href={{comment.post_id}}>
+              <h2 class="post-title">
+                {{comment.subject}}
+              </h2>
+              <h3 class="post-subtitle">
+                {% if comment.content|length > 300 %}
+                {{ comment.content[0:150] }}...
+                {% else %}
+                {{comment.subject}}
+                {% endif %}
+              </h3>
+          </a>
+      </div>
+      <hr>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

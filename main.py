@@ -454,7 +454,7 @@ class LikeHandler(Handler):
             if user_id in post.liked_by:
                 self.render_improper_endpoint_access("like")
             else:
-                if post.submitter_id != user_id
+                if post.submitter_id != user_id:
                     post.liked_by.append(user.key().id())
                     post.put()
                     self.redirect('/%s' % str(post.key().id()))
@@ -529,6 +529,28 @@ class DeleteComment(Handler):
         self.redirect('/%s' % post_id)
 
 
+class Profile(Handler):
+    """Profile rendering"""
+    def get(self):
+        user=self.get_active_user()
+        if user:
+            user_id = user.key().id()
+            posts = db.GqlQuery("select * from Posts where submitter_id=:1"
+                                ,user_id)
+            comments = db.GqlQuery("select * from Comments where"
+                                   " submitter_id=:1",user_id)
+            self.render("profile.html",
+                        main_heading="User: " + user.username,
+                        main_desc="Your posts and comments",
+                        user=user,
+                        num_comments=len([comment for comment in comments]),
+                        num_posts=len([post for post in posts]),
+                        posts=posts,
+                        comments=comments)
+        else:
+            self.redirect('/login')
+
+
 class MainPage(Handler):
     """Renders main page"""
     def get(self):
@@ -564,6 +586,7 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/comment', NewComment),
                                ('/modcomment', ModComment),
                                ('/delete_comment', DeleteComment),
-                               ('/delete_post', DeletePost)
+                               ('/delete_post', DeletePost),
+                               ('/profile', Profile)
                                ],
                               debug=True)
