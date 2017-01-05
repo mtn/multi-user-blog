@@ -547,8 +547,8 @@ class Profile(Handler):
                     main_heading="User: " + user.username,
                     main_desc="Your posts and comments",
                     user=user,
-                    # num_comments=len([comment for comment in comments]),
-                    # num_posts=len([post for post in posts]),
+                    num_comments=len([comment for comment in comments]),
+                    num_posts=len([post for post in posts]),
                     posts=posts,
                     comments=comments)
 

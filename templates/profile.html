@@ -5,6 +5,7 @@
 <div class="container">
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <h3>Posts:</h3>
       {% if num_posts == 0 %}
       <p>No posts yet</p>
       {% else %}
@@ -23,9 +24,12 @@
               </h3>
           </a>
       </div>
+      <br>
       <hr>
+      <br>
       {% endfor %}
       {% endif %}
+      <h3>Comments:</h3>
       {% if num_comments == 0 %}
       <p>No comments yet</p>
       {% else %}
